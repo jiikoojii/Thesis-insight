@@ -25,7 +25,7 @@
 #
 
 #***** VARIABLES TO BE UPDATED *****
-
+$StartMs = (Get-Date).Millisecond
 #Change the value below to the threat list that you wish to import.
 #$IOCURL = " [ paste in the Target Threat List to import ] "
 $IOCURL = "https://feodotracker.abuse.ch/downloads/ipblocklist.txt"
@@ -47,8 +47,9 @@ $IOCURL = "https://feodotracker.abuse.ch/downloads/ipblocklist.txt"
 #The first file contains a list of indicators scraped from the $IOCURL website.  It is not cleaned up.
 $IOCOutputFileName = "indicators.txt"
 #The CSV file is clean and ready to be uploaded.
-$CSVOutputFileName = "indicators.json"
-
+$CSVOutputFileName = "indicators.csv"
+#The JSON file
+$JSONOutputFileName = "indicators.json"
 # Get the location of the script for the output files.  Output files 
 # will be located where script is being run.
 $path = Get-Location
@@ -92,23 +93,24 @@ if ($word -eq 0){
 	
 $IOCblocklist = Import-CSV tempindicators.txt -Header "Field1", "Field2", "Field3", "Field4", "Field5", "Field6" `
 	| Select Field1 `
-	| ConvertTo-CSV -NoTypeInformation `
+	| ConvertTo-Csv -NoTypeInformation `
 	| % {$_ -replace  ` '\G(?<start>^|,)(("(?<output>[^,"]*?)"(?=,|$))|(?<output>".*?(?<!")("")*?"(?=,|$)))' ` ,'${start}${output}'} `
 	| %{$_ -replace '$',','}`
 	| Out-File $IOCFilePath -fo -en ascii ; 
 
-import-csv $IOCFilePath | ConvertTo-Json
 
 #You can uncomment the following line to delete blank lines from the output, if there are any.
 #(Get-Content $IOCFilePath) | ? {$_.trim() -ne "" } | set-content $CSVFilePath
 Write-Host "Clean up the file by removing the header"
 #Skip reading the first line of the file, which is a header.
 #Delete all of the lines that start with a #, which are also part of the header.
-Get-Content $IOCFilePath | Select-Object -Skip 1 | Where { $_ -notmatch '^\#' } | Set-Content $CSVFilePath
+Get-Content $IOCFilePath | Select-Object -Skip 1 | Where { $_ -notmatch '^\#' } | Set-Content $CSVOutputFileName
+$Testi = Get-Content $CSVOutputFileName
+$Testi -replace "^*?:" -replace ",", "" | ConvertTo-Json | Set-Content $JSONOutputFileName
 
 #Command to emulate curl with PowerShell.
 #Write-Host "Starting command to connect to API"
 #$ContentType = 'text/csv'
 #$Response = Invoke-WebRequest -Uri $url -Headers $headers -InFile $CSVFilePath -Method Post -ContentType $ContentType -UseBasicParsing
-
-Write-Host "Script has finished running. Check your results."
+$EndMs = (Get-Date).Millisecond
+Write-Host "Script has finished running. Check your results. The script took $($EndMs - $StartMs)ms to run, yay"
