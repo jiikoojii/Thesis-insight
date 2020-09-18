@@ -106,6 +106,7 @@ Write-Host "Clean up the file by removing the header"
 #Delete all of the lines that start with a #, which are also part of the header.
 Get-Content $IOCFilePath | Select-Object -Skip 1 | Where { $_ -notmatch '^\#' } | Set-Content $CSVOutputFileName
 $Testi = Get-Content $CSVOutputFileName
+#Remove duplicating strings from the output and convert to JSON
 $Testi -replace "^*?:" -replace ",", "" | ConvertTo-Json | Set-Content $JSONOutputFileName
 
 #Command to emulate curl with PowerShell.
