@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+#Must be run in the same directory where the files exist
+#Converts .txt files downloaded by get-otx-iocs.py to .json
+#and adds indent for cleaner readability
+
 import json, csv
 
 ioc_list = []
