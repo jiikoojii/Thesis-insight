@@ -5,7 +5,7 @@ import xmltodict
 import json
 import sys
 
-xml_file = sys.argv[1]
+xml_file = sys.argv[1] #Requires user input when running the script. Give the filename you want to convert.
 #user_named = sys.argv[2]
 tree = ET.parse(xml_file)
 xml_data = tree.getroot()
